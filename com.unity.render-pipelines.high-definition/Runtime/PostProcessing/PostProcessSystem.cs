@@ -1354,7 +1354,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             //  d |  /
             //    | /                ,
             //    |/                .
-            //    P 
+            //    P
             //    |              ´
             //    |         , ´
             //    +-    ´
@@ -1908,7 +1908,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             );
 
             // Blit to backbuffer
-            HDUtils.DrawFullScreen(cmd, camera, m_FinalPassMaterial, BuiltinRenderTextureType.CameraTarget, shaderPassId: pass);
+            CoreUtils.SetRenderTarget(cmd, BuiltinRenderTextureType.CameraTarget);
+            cmd.SetViewport(camera.viewport);
+            cmd.DrawProcedural(Matrix4x4.identity, m_FinalPassMaterial, pass, MeshTopology.Triangles, 3, 1);
         }
 
         #endregion
