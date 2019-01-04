@@ -159,6 +159,14 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             {
                 return activeFields;
             }
+            if(masterNode.affectsAlbedo.isOn)
+            {
+                activeFields.Add("Material.AffectsAlbedo");
+            }
+            if (masterNode.affectsNormal.isOn)
+            {
+                activeFields.Add("Material.AffectsNormal");
+            }
             return activeFields;
         }
 

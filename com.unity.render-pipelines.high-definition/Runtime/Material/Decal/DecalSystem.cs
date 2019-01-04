@@ -120,6 +120,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         private Texture2DAtlas m_Atlas = null;
         public bool m_AllocationSuccess = true;
         public bool m_PrevAllocationSuccess = true;
+        public bool m_ShaderGraphDecalWarningDisplayed = false;
 
         public Texture2DAtlas Atlas
         {
@@ -165,6 +166,11 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         private List<TextureScaleBias> m_TextureList = new List<TextureScaleBias>();
 
+        static public bool IsHDRenderPipelineDecal(string name)
+        {
+            return name == "HDRP/Decal";
+        }
+
 
         private class DecalSet
         {
@@ -172,7 +178,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             {
                 if (m_Material == null)
                     return;
-                m_IsHDRenderPipelineDecal = (m_Material.shader.name == "HDRP/Decal");
+                m_IsHDRenderPipelineDecal = IsHDRenderPipelineDecal(m_Material.shader.name);
 
                 if (m_IsHDRenderPipelineDecal)
                 {
@@ -495,10 +501,27 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     return;
                 if (m_NumResults == 0)
                     return;
-                int batchIndex = 0;
-                int totalToDraw = m_NumResults;
                 HDRenderPipelineAsset hdrp = GraphicsSettings.renderPipelineAsset as HDRenderPipelineAsset;
                 bool perChannelMask = hdrp.renderPipelineSettings.decalSettings.perChannelMask;
+                if (!m_IsHDRenderPipelineDecal)
+                {
+                    if (!perChannelMask) // shader graph decals are not supported in 3RT mode
+                    {
+                        if(!instance.m_ShaderGraphDecalWarningDisplayed)
+                        {
+                            Debug.LogWarning("Shader graph decals are not supported when Metal and AO properties are disabled in render pipe asset");
+                            instance.m_ShaderGraphDecalWarningDisplayed = true;
+                        }                        
+                        return;
+                    }
+                    else
+                    {
+                        instance.m_ShaderGraphDecalWarningDisplayed = false;
+                    }
+                }
+
+                int batchIndex = 0;
+                int totalToDraw = m_NumResults;
                 int shaderPass = perChannelMask ? MaskBlendMode : (int)Decal.MaskBlendFlags.Smoothness; // relies on the order shader passes are declared in decal.shader and decalUI.cs
               
                 for (; batchIndex < m_NumResults / kDrawIndexedBatchSize; batchIndex++)
@@ -557,13 +580,10 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     }
                     else
                     {
-                        // TODO
                         return 0;
                     }
                 }
             }
-
-
 
             private List<Matrix4x4[]> m_DecalToWorld = new List<Matrix4x4[]>();
             private List<Matrix4x4[]> m_NormalToWorld = new List<Matrix4x4[]>();
