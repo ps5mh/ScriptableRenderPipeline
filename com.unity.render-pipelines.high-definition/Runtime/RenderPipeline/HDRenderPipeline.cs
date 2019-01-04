@@ -972,7 +972,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     var visibleInIndices = probeToRenderAndDependencies.Value;
 
                     // Two cases:
-                    //   - If the probe is view independent, we add only one render request per face that is 
+                    //   - If the probe is view independent, we add only one render request per face that is
                     //      a dependency for all its 'visibleIn' render requests
                     //   - If the probe is view dependent, we add one render request per face per 'visibleIn'
                     //      render requests
@@ -1089,7 +1089,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                         // TODO: Assign the actual final target to render to.
                         //   Currently, we use a target for each probe, and then copy it into the cache before using it
                         //   during the lighting pass.
-                        //   But what we actually want here, is to render directly into the cache (either CubeArray, 
+                        //   But what we actually want here, is to render directly into the cache (either CubeArray,
                         //   or Texture2DArray)
                         //   To do so, we need to first allocate in the cache the location of the target and then assign
                         //   it here.
@@ -1484,8 +1484,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 StopStereoRendering(cmd, renderContext, camera);
 
                 HDGPUAsyncTask buildLightListTask = new HDGPUAsyncTask("Build light list", ComputeQueueType.Background);
-                // It is important that this task is in the same queue as the build light list due to dependency it has on it. If really need to move it, put an extra fence to make sure buildLightListTask has finished. 
-                HDGPUAsyncTask volumeVoxelizationTask = new HDGPUAsyncTask("Volumetric voxelization", ComputeQueueType.Background); 
+                // It is important that this task is in the same queue as the build light list due to dependency it has on it. If really need to move it, put an extra fence to make sure buildLightListTask has finished.
+                HDGPUAsyncTask volumeVoxelizationTask = new HDGPUAsyncTask("Volumetric voxelization", ComputeQueueType.Background);
                 HDGPUAsyncTask SSRTask = new HDGPUAsyncTask("Screen Space Reflection", ComputeQueueType.Background);
                 HDGPUAsyncTask SSAOTask = new HDGPUAsyncTask("SSAO", ComputeQueueType.Background);
                 HDGPUAsyncTask contactShadowsTask = new HDGPUAsyncTask("Screen Space Shadows", ComputeQueueType.Background);
@@ -1984,8 +1984,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             {
                 bool renderPrePostprocessGizmos = (gizmoSubset == GizmoSubset.PreImageEffects);
 
-                using (new ProfilingSample(cmd, 
-                    renderPrePostprocessGizmos ? "PrePostprocessGizmos" : "Gizmos", 
+                using (new ProfilingSample(cmd,
+                    renderPrePostprocessGizmos ? "PrePostprocessGizmos" : "Gizmos",
                     renderPrePostprocessGizmos ? CustomSamplerId.GizmosPrePostprocess.GetSampler() : CustomSamplerId.Gizmos.GetSampler()))
                 {
                     renderContext.ExecuteCommandBuffer(cmd);
@@ -2862,11 +2862,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     m_DebugFullScreenPropertyBlock.SetInt(HDShaderIDs._DebugDepthPyramidMip, (int)(m_CurrentDebugDisplaySettings.data.fullscreenDebugMip * info.mipLevelCount));
                     m_DebugFullScreenPropertyBlock.SetBuffer(HDShaderIDs._DebugDepthPyramidOffsets, info.GetOffsetBufferData(m_DepthPyramidMipLevelOffsetsBuffer));
 
-                    CoreUtils.SetRenderTarget(cmd, BuiltinRenderTextureType.CameraTarget);
-                    cmd.SetViewport(hdCamera.viewport);
                     cmd.SetGlobalVector(HDShaderIDs._ScreenToTargetScale, hdCamera.doubleBufferedViewportScale);
-                    cmd.DrawProcedural(Matrix4x4.identity, m_DebugFullScreen, 0, MeshTopology.Triangles, 3, 1, m_DebugFullScreenPropertyBlock);
-
+                    HDUtils.DrawFullScreen(cmd, hdCamera.viewport, m_DebugFullScreen, BuiltinRenderTextureType.CameraTarget, m_DebugFullScreenPropertyBlock, 0);
                     PushColorPickerDebugTexture(hdCamera, cmd, (RenderTargetIdentifier)BuiltinRenderTextureType.CameraTarget);
                 }
 
@@ -2916,10 +2913,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     // Everything we have capture is flipped (as it happen before FinalPass/postprocess/Blit. So if we are not in SceneView
                     // (i.e. we have perform a flip, we need to flip the input texture) + we need to handle the case were we debug a fullscreen pass that have already perform the flip
 
-                    CoreUtils.SetRenderTarget(cmd, BuiltinRenderTextureType.CameraTarget);
-                    cmd.SetViewport(hdCamera.viewport);
                     cmd.SetGlobalVector(HDShaderIDs._ScreenToTargetScale, hdCamera.doubleBufferedViewportScale);
-                    cmd.DrawProcedural(Matrix4x4.identity, m_DebugColorPicker, 0, MeshTopology.Triangles, 3, 1, m_DebugFullScreenPropertyBlock);
+                    HDUtils.DrawFullScreen(cmd, hdCamera.viewport, m_DebugColorPicker, BuiltinRenderTextureType.CameraTarget, m_DebugFullScreenPropertyBlock, 0);
                 }
             }
         }

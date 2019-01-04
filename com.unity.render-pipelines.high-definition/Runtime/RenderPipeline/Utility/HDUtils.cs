@@ -328,12 +328,10 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 scaleBias.y *= -1;
             }
 
-            cmd.SetRenderTarget(destination);
-            cmd.SetViewport(camera.viewport);
             s_PropertyBlock.SetTexture(HDShaderIDs._BlitTexture, source);
             s_PropertyBlock.SetVector(HDShaderIDs._BlitScaleBias, scaleBias);
             s_PropertyBlock.SetFloat(HDShaderIDs._BlitMipLevel, 0);
-            cmd.DrawProcedural(Matrix4x4.identity, GetBlitMaterial(), 0, MeshTopology.Triangles, 3, 1, s_PropertyBlock);
+            DrawFullScreen(cmd, camera.viewport, GetBlitMaterial(), destination, s_PropertyBlock, 0);
         }
 
         // This particular case is for blitting a non-scaled texture into a scaled texture. So we setup the partial viewport but don't scale the input UVs.
@@ -396,6 +394,13 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         {
             CoreUtils.SetRenderTarget(commandBuffer, colorBuffer);
             commandBuffer.SetGlobalVector(HDShaderIDs._ScreenToTargetScale, camera.doubleBufferedViewportScale);
+            commandBuffer.DrawProcedural(Matrix4x4.identity, material, shaderPassId, MeshTopology.Triangles, 3, 1, properties);
+        }
+
+        public static void DrawFullScreen(CommandBuffer commandBuffer, Rect viewport, Material material, RenderTargetIdentifier destination, MaterialPropertyBlock properties = null, int shaderPassId = 0)
+        {
+            CoreUtils.SetRenderTarget(commandBuffer, destination);
+            commandBuffer.SetViewport(viewport);
             commandBuffer.DrawProcedural(Matrix4x4.identity, material, shaderPassId, MeshTopology.Triangles, 3, 1, properties);
         }
 

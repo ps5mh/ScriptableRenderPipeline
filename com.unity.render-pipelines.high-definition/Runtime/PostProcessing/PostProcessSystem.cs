@@ -1204,7 +1204,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 m_MotionBlur.tileMinMaxVelRatioForHighQuality
             );
 
-            bool combinedPrepAndTile = (Application.platform == RuntimePlatform.XboxOne) && false;   // TODO_FCC: This only on scorpio actually... Also, it is quite messy. 
+            bool combinedPrepAndTile = (Application.platform == RuntimePlatform.XboxOne) && false;   // TODO_FCC: This only on scorpio actually... Also, it is quite messy.
 
             // -----------------------------------------------------------------------------
             // Prep velocity
@@ -1906,9 +1906,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             );
 
             // Blit to backbuffer
-            CoreUtils.SetRenderTarget(cmd, BuiltinRenderTextureType.CameraTarget);
-            cmd.SetViewport(camera.viewport);
-            cmd.DrawProcedural(Matrix4x4.identity, m_FinalPassMaterial, pass, MeshTopology.Triangles, 3, 1);
+            HDUtils.DrawFullScreen(cmd, camera.viewport, m_FinalPassMaterial, BuiltinRenderTextureType.CameraTarget, null, pass);
         }
 
         #endregion
