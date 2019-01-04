@@ -118,6 +118,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             }
         }
 
+        public bool isMainGameView { get { return camera.cameraType == CameraType.Game && camera.targetTexture == null; } }
+
         // View-projection matrix from the previous frame (non-jittered).
         public Matrix4x4 prevViewProjMatrix;
         public Matrix4x4 prevViewProjMatrixNoCameraTrans;

@@ -1259,7 +1259,6 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             var cullingResults = renderRequest.cullingResults.cullingResults;
             var hdProbeCullingResults = renderRequest.cullingResults.hdProbeCullingResults;
             var target = renderRequest.target;
-            bool isMainGameView = (camera.cameraType == CameraType.Game && hdCamera.camera.targetTexture == null);
 
             m_DbufferManager.enableDecals = false;
             if (hdCamera.frameSettings.enableDecals)
@@ -1691,7 +1690,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                         }
                         else
                         {
-                            HDUtils.BlitCameraTexture(cmd, hdCamera, m_CameraColorBuffer, target.id, hdCamera.flipYMode == HDAdditionalCameraData.FlipYMode.ForceFlipY || isMainGameView);
+                            HDUtils.BlitCameraTexture(cmd, hdCamera, m_CameraColorBuffer, target.id, hdCamera.flipYMode == HDAdditionalCameraData.FlipYMode.ForceFlipY || hdCamera.isMainGameView);
                         }
                     }
                 }
@@ -1712,7 +1711,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             // Note: Debug.DrawLine and Debug.Ray only work in editor, not in player
             bool copyDepth = (hdCamera.camera.targetTexture != null ? hdCamera.camera.targetTexture.depth != 0 : false);
 #if UNITY_EDITOR
-            copyDepth = copyDepth || isMainGameView; // Specific case of Debug.DrawLine and Debug.Ray
+            copyDepth = copyDepth || hdCamera.isMainGameView; // Specific case of Debug.DrawLine and Debug.Ray
 #endif
             // NOTE: This needs to be done before the call to RenderDebug because debug overlays need to update the depth for the scene view as well.
             // Make sure RenderDebug does not change the current Render Target
@@ -1724,7 +1723,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     cmd.SetViewport(hdCamera.viewport);
                     m_CopyDepthPropertyBlock.SetTexture(HDShaderIDs._InputDepth, m_SharedRTManager.GetDepthStencilBuffer());
                     // When we are Main Game View we need to flip the depth buffer ourselves as we are after postprocess / blit that have already flip the screen
-                    m_CopyDepthPropertyBlock.SetInt("_FlipY", isMainGameView ? 1 : 0);
+                    m_CopyDepthPropertyBlock.SetInt("_FlipY", hdCamera.isMainGameView ? 1 : 0);
                     CoreUtils.DrawFullScreen(cmd, m_CopyDepth, m_CopyDepthPropertyBlock);
                 }
             }
@@ -2372,7 +2371,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     else
                     {
                         // This Blit will flip the screen anything other than openGL
-                        HDUtils.BlitCameraTexture(cmd, hdCamera, m_CameraColorBuffer, BuiltinRenderTextureType.CameraTarget, hdCamera.camera.cameraType == CameraType.Game);
+                        HDUtils.BlitCameraTexture(cmd, hdCamera, m_CameraColorBuffer, BuiltinRenderTextureType.CameraTarget, hdCamera.isMainGameView);
                     }
                 }
             }

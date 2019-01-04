@@ -1897,9 +1897,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             }
 
             // Flip logic
-            bool flip = SystemInfo.graphicsUVStartsAtTop
-                && camera.camera.cameraType != CameraType.SceneView
-                && camera.camera.targetTexture == null;
+            bool flip = SystemInfo.graphicsUVStartsAtTop && camera.isMainGameView;
 
             m_FinalPassMaterial.SetVector(HDShaderIDs._UVTransform,
                 flip
